@@ -2,6 +2,7 @@ from ninja import NinjaAPI
 from .schemas import HospitalSchema
 from .models import Hospital
 from django.shortcuts import get_object_or_404
+from django.db.models import Q
 
 app = NinjaAPI(title='Hospitals API')
 
@@ -14,21 +15,21 @@ def get_hospital(request):
 
 
 # Get hospitals by ID
-@app.get('hospital/{hospital_id}', response=HospitalSchema, description='Endpoint to get hospitals by ID')
+@app.get('hospitals/{hospital_id}', response=HospitalSchema, description='Endpoint to get hospitals by ID')
 def get_hospital_by_id(request, hospital_id: int):
     hospital = get_object_or_404(Hospital, id=hospital_id)
     return hospital
 
 
 # Create a new hospital
-@app.post('hospital/', response=HospitalSchema)
+@app.post('hospitals/', response=HospitalSchema)
 def create_hospital(request, payload: HospitalSchema):
     hospital = Hospital.objects.create(**payload.dict())
     return hospital
 
 
 # Update a hospital
-@app.put('hospital/{hospital_id}', response=HospitalSchema)
+@app.put('hospitals/{hospital_id}', response=HospitalSchema)
 def update_hospital(request, hospital_id: int, payload: HospitalSchema):
     hospital = get_object_or_404(Hospital, id=hospital_id)
     for attr, value in payload.dict().items():
@@ -38,10 +39,16 @@ def update_hospital(request, hospital_id: int, payload: HospitalSchema):
 
 
 # Delete API Hospital
-@app.delete('hospital/{hospital_id}')
+@app.delete('hospitals/{hospital_id}')
 def delete_hopsital(request, hospital_id: int):
     hospital = get_object_or_404(Hospital, id=hospital_id)
     hospital.delete()
     return {'success': True}
 
-#busque
+
+
+#busqueda search hospital  /hospital/search?query=Berlin
+@app.get('hospitals/search/',response=list[HospitalSchema])
+def search_hospital(request, query: str ):
+    hospital =  Hospital.objects.filter(Q(hospital_name__icontains=query) | Q(city_town__icontains=query))
+    return hospital
