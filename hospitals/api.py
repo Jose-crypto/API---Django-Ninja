@@ -35,3 +35,13 @@ def update_hospital(request, hospital_id: int, payload: HospitalSchema):
         setattr(hospital, attr, value)
     hospital.save()
     return {'success': True}
+
+
+# Delete API Hospital
+@app.delete('hospital/{hospital_id}')
+def delete_hopsital(request, hospital_id: int):
+    hospital = get_object_or_404(Hospital, id=hospital_id)
+    hospital.delete()
+    return {'success': True}
+
+#busque
