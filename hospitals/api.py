@@ -1,5 +1,5 @@
-from ninja import NinjaAPI
-from .schemas import HospitalSchema
+from ninja import NinjaAPI , Query
+from .schemas import HospitalSchema, HospitalFilterSchema
 from .models import Hospital
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
@@ -52,3 +52,9 @@ def delete_hopsital(request, hospital_id: int):
 def search_hospital(request, query: str ):
     hospital =  Hospital.objects.filter(Q(hospital_name__icontains=query) | Q(city_town__icontains=query))
     return hospital
+
+
+
+#Busqueda de }
+@app.get('hospitals/')
+def list_hospitals(request, filters= HospitalFilterSchema = Query(...))

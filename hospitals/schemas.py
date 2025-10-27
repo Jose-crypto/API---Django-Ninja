@@ -1,4 +1,4 @@
-from ninja import Schema, ModelSchema
+from ninja import ModelSchema , FilterSchema
 from .models import Hospital
 
 # Schema class of pydantics used to validate data reques (validar datos de entrada), and format data of response(validar datos de salida )
@@ -12,3 +12,4 @@ class HospitalSchema(ModelSchema):
         model_fields = '__all__'
 
 
+#schema para busqueda 
