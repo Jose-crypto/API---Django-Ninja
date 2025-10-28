@@ -1,5 +1,6 @@
-from ninja import NinjaAPI , Query
-from .schemas import HospitalSchema, HospitalFilterSchema
+from ninja import NinjaAPI , Query, UploadedFile, File
+from ninja.security import APIKeyHeader  #security of endpoint
+from .schemas import HospitalSchema, HospitalFilterSchema, HospitalNameSchema
 from .models import Hospital
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
@@ -56,8 +57,21 @@ def search_hospital(request, query: str ):
 
 
 #Busqueda con filter (Case sensitive)
-@app.get('hospitals/', response=list[HospitalSchema])
+@app.get('hospitals/find/', response=list[HospitalSchema])
 def list_hospitals(request, filters: HospitalFilterSchema = Query(...)):
     hospital= Hospital.objects.all()
     hospital = filters.filter(hospital)
     return hospital
+
+#Search by hospital name 
+@app.get('hospitals/',response=list[HospitalSchema], description='Endpoint to get all data of the hospital name')
+def list_hospitals_by_name(request, filters: HospitalNameSchema = Query(...)):
+    hospital= Hospital.objects.all()
+    hospital = filters.filter(hospital)
+    return hospital 
+
+
+@app.post('upload/')
+def upload(request, file: UploadedFile = File(...)):
+    data = file.read()
+    return {'File_name': file.name, 'data': len(data)}
