@@ -1,22 +1,41 @@
 from ninja import NinjaAPI , Query, UploadedFile, File
-from ninja.security import APIKeyHeader  #security of endpoint
+from ninja.security import APIKeyQuery #security of endpoint
+from ninja.throttling import  AnonRateThrottle # for DDos Atack , Rate Limiting
 from .schemas import HospitalSchema, HospitalFilterSchema, HospitalNameSchema
 from .models import Hospital
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
+from typing import Optional, Any
+from django.http import HttpRequest
 
+
+
+#init APP
 app = NinjaAPI(title='Hospitals API')
 
 
+# API security
+class ApiKey(APIKeyQuery):
+    param_name = 'api_key'
+    def authenticate(self, request: HttpRequest, key:Optional[str]) -> Optional[Any]:
+        valid_keys=['key1','key2','key3'] #remplazar por claves validas
+        if key in valid_keys:
+            return {'key':key}
+        else:
+            return None
+
+
+api_key = ApiKey()
+
 # Get all hospitals
-@app.get('hospital/', response=list[HospitalSchema], description='Endpoint to get all hospitals')
+@app.get('hospital/', response=list[HospitalSchema], auth=api_key ,description='Endpoint to get all hospitals', throttle=[AnonRateThrottle('5/s')])
 def get_hospital(request):
     hospital = Hospital.objects.all()
     return hospital
 
 
 # Get hospitals by ID
-@app.get('hospitals/{hospital_id}', response=HospitalSchema, description='Endpoint to get hospitals by ID')
+@app.get('hospitals/{hospital_id}', response=HospitalSchema, throttle=[AnonRateThrottle('1/s')] , description='Endpoint to get hospitals by ID')
 def get_hospital_by_id(request, hospital_id: int):
     hospital = get_object_or_404(Hospital, id=hospital_id)
     return hospital
