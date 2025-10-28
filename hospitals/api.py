@@ -55,6 +55,9 @@ def search_hospital(request, query: str ):
 
 
 
-#Busqueda de }
-@app.get('hospitals/')
-def list_hospitals(request, filters= HospitalFilterSchema = Query(...))
+#Busqueda con filter (Case sensitive)
+@app.get('hospitals/', response=list[HospitalSchema])
+def list_hospitals(request, filters: HospitalFilterSchema = Query(...)):
+    hospital= Hospital.objects.all()
+    hospital = filters.filter(hospital)
+    return hospital
