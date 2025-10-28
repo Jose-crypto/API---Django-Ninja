@@ -90,6 +90,7 @@ def list_hospitals_by_name(request, filters: HospitalNameSchema = Query(...)):
     return hospital 
 
 
+#endpoint para subir archivos
 @app.post('upload/')
 def upload(request, file: UploadedFile = File(...)):
     data = file.read()
