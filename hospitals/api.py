@@ -112,4 +112,4 @@ def lists_hospitals_by_website(request, filters: HospiltaWebsiteSchema = Query(.
 @app.post('upload/',auth=api_key)
 def upload(request, file: UploadedFile = File(...)):
     data = file.read()
-    return {'File_name': file.name, 'data': len(data)}
+    return {'File_namee': file.name, 'data': len(data)}
