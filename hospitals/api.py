@@ -1,7 +1,7 @@
 from ninja import NinjaAPI , Query, UploadedFile, File
 from ninja.security import APIKeyQuery #security of endpoint
 from ninja.throttling import  AnonRateThrottle # for DDos Atack , Rate Limiting
-from .schemas import HospitalSchema, HospitalFilterSchema, HospitalNameSchema
+from .schemas import HospitalSchema, HospitalFilterSchema, HospitalNameSchema, HospitalDistrictSchema
 from .models import Hospital
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
@@ -86,8 +86,16 @@ def list_hospitals(request, filters: HospitalFilterSchema = Query(...)):
 @app.get('hospitals/',response=list[HospitalSchema], description='Endpoint to get all data of the hospital name')
 def list_hospitals_by_name(request, filters: HospitalNameSchema = Query(...)):
     hospital= Hospital.objects.all()
-    hospital = filters.filter(hospital)
+    hospital = filters.filter(hospital) 
     return hospital 
+
+
+#search by district name 
+@app.get('hospitals/',response=list[HospitalSchema], description='Endpoint to get list of te hospitals by district name')
+def list_hospitals_by_disctrict(request, filters: HospitalDistrictSchema= Query(...)):
+    hopsital= Hospital.objects.all()
+    hospital = filters.filter(hopsital)
+    return hospital
 
 
 #endpoint para subir archivos
