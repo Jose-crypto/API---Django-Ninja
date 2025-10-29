@@ -21,3 +21,12 @@ class HospitalFilterSchema(FilterSchema):
 # schema para busqueda segun el nombre del hospital (Filter es case sensitive)
 class HospitalNameSchema(FilterSchema):
     hospital_name: Optional[str] = None 
+
+#schema para busqueda segun el district
+class HospitalDistrictSchema(FilterSchema):
+    district : Optional[str] = None
+    
+    
+#schema para busqueda segun el namewebsite
+class HospiltaWebsiteSchema(FilterSchema):
+    website : Optional[str] = None
