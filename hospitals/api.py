@@ -37,21 +37,21 @@ def get_hospital(request):
 
 
 # Get hospitals by ID
-@app.get('hospitals/{hospital_id}', response=HospitalSchema, throttle=[AnonRateThrottle('1/s')], description='Endpoint to get hospitals by ID')
+@app.get('hospitals/{hospital_id}', response=HospitalSchema, throttle=[AnonRateThrottle('1/s')], description='Endpoint to get hospitals by ID',auth=api_key)
 def get_hospital_by_id(request, hospital_id: int):
     hospital = get_object_or_404(Hospital, id=hospital_id)
     return hospital
 
 
 # Create a new hospital
-@app.post('hospitals/', response=HospitalSchema)
+@app.post('hospitals/', response=HospitalSchema, auth=api_key)
 def create_hospital(request, payload: HospitalSchema):
     hospital = Hospital.objects.create(**payload.dict())
     return hospital
 
 
 # Update a hospital
-@app.put('hospitals/{hospital_id}', response=HospitalSchema)
+@app.put('hospitals/{hospital_id}', response=HospitalSchema,auth=api_key)
 def update_hospital(request, hospital_id: int, payload: HospitalSchema):
     hospital = get_object_or_404(Hospital, id=hospital_id)
     for attr, value in payload.dict().items():
@@ -61,7 +61,7 @@ def update_hospital(request, hospital_id: int, payload: HospitalSchema):
 
 
 # Delete API Hospital
-@app.delete('hospitals/{hospital_id}')
+@app.delete('hospitals/{hospital_id}',auth=api_key)
 def delete_hopsital(request, hospital_id: int):
     hospital = get_object_or_404(Hospital, id=hospital_id)
     hospital.delete()
@@ -69,7 +69,7 @@ def delete_hopsital(request, hospital_id: int):
 
 
 # busqueda search hospital  /hospital/search?query=Berlin
-@app.get('hospitals/search/', response=list[HospitalSchema])
+@app.get('hospitals/search/', response=list[HospitalSchema],auth=api_key)
 def search_hospital(request, query: str):
     hospital = Hospital.objects.filter(
         Q(hospital_name__icontains=query) | Q(city_town__icontains=query))
@@ -85,7 +85,7 @@ def list_hospitals(request, filters: HospitalFilterSchema = Query(...)):
 
 
 # Search by hospital name
-@app.get('hospitals/name/', response=list[HospitalSchema], description='Endpoint to get all data of the hospital name')
+@app.get('hospitals/name/', response=list[HospitalSchema], description='Endpoint to get all data of the hospital name',auth=api_key)
 def list_hospitals_by_name(request, filters: HospitalNameSchema = Query(...)):
     hospital = Hospital.objects.all()
     hospital = filters.filter(hospital)
@@ -93,7 +93,7 @@ def list_hospitals_by_name(request, filters: HospitalNameSchema = Query(...)):
 
 
 # search by district name
-@app.get('hospitals/district/', response=list[HospitalSchema], description='Endpoint to get list of te hospitals by district name')
+@app.get('hospitals/district/', response=list[HospitalSchema], description='Endpoint to get list of te hospitals by district name',auth=api_key)
 def list_hospitals_by_disctrict(request, filters: HospitalDistrictSchema = Query(...)):
     hopsital = Hospital.objects.all()
     hospital = filters.filter(hopsital)
@@ -101,7 +101,7 @@ def list_hospitals_by_disctrict(request, filters: HospitalDistrictSchema = Query
 
 
 # searc hospitals by website
-@app.get('hospitals/website/', response=list[HospitalSchema])
+@app.get('hospitals/website/', response=list[HospitalSchema],auth=api_key)
 def lists_hospitals_by_website(request, filters: HospiltaWebsiteSchema = Query(...)):
     hospital = Hospital.objects.all()
     hospital = filters.filter(hospital)
@@ -109,7 +109,7 @@ def lists_hospitals_by_website(request, filters: HospiltaWebsiteSchema = Query(.
 
 
 # endpoint para subir archivos
-@app.post('upload/')
+@app.post('upload/',auth=api_key)
 def upload(request, file: UploadedFile = File(...)):
     data = file.read()
     return {'File_name': file.name, 'data': len(data)}
