@@ -1,7 +1,7 @@
-from ninja import NinjaAPI , Query, UploadedFile, File
-from ninja.security import APIKeyQuery #security of endpoint
-from ninja.throttling import  AnonRateThrottle # for DDos Atack , Rate Limiting
-from .schemas import HospitalSchema, HospitalFilterSchema, HospitalNameSchema, HospitalDistrictSchema
+from ninja import NinjaAPI, Query, UploadedFile, File
+from ninja.security import APIKeyQuery  # security of endpoint
+from ninja.throttling import AnonRateThrottle  # for DDos Atack , Rate Limiting
+from .schemas import HospitalSchema, HospitalFilterSchema, HospitalNameSchema, HospitalDistrictSchema, HospiltaWebsiteSchema
 from .models import Hospital
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
@@ -9,18 +9,18 @@ from typing import Optional, Any
 from django.http import HttpRequest
 
 
-
-#init APP
+# init APP
 app = NinjaAPI(title='Hospitals API')
 
 
 # API security
 class ApiKey(APIKeyQuery):
     param_name = 'api_key'
-    def authenticate(self, request: HttpRequest, key:Optional[str]) -> Optional[Any]:
-        valid_keys=['key1','key2','key3'] #remplazar por claves validas
+
+    def authenticate(self, request: HttpRequest, key: Optional[str]) -> Optional[Any]:
+        valid_keys = ['key1', 'key2', 'key3']  # remplazar por claves validas
         if key in valid_keys:
-            return {'key':key}
+            return {'key': key}
         else:
             return None
 
@@ -28,14 +28,16 @@ class ApiKey(APIKeyQuery):
 api_key = ApiKey()
 
 # Get all hospitals
-@app.get('hospital/', response=list[HospitalSchema], auth=api_key ,description='Endpoint to get all hospitals', throttle=[AnonRateThrottle('5/s')])
+
+
+@app.get('hospital/', response=list[HospitalSchema], auth=api_key, description='Endpoint to get all hospitals', throttle=[AnonRateThrottle('5/s')])
 def get_hospital(request):
     hospital = Hospital.objects.all()
     return hospital
 
 
 # Get hospitals by ID
-@app.get('hospitals/{hospital_id}', response=HospitalSchema, throttle=[AnonRateThrottle('1/s')] , description='Endpoint to get hospitals by ID')
+@app.get('hospitals/{hospital_id}', response=HospitalSchema, throttle=[AnonRateThrottle('1/s')], description='Endpoint to get hospitals by ID')
 def get_hospital_by_id(request, hospital_id: int):
     hospital = get_object_or_404(Hospital, id=hospital_id)
     return hospital
@@ -66,39 +68,47 @@ def delete_hopsital(request, hospital_id: int):
     return {'success': True}
 
 
-
-#busqueda search hospital  /hospital/search?query=Berlin
-@app.get('hospitals/search/',response=list[HospitalSchema])
-def search_hospital(request, query: str ):
-    hospital =  Hospital.objects.filter(Q(hospital_name__icontains=query) | Q(city_town__icontains=query))
+# busqueda search hospital  /hospital/search?query=Berlin
+@app.get('hospitals/search/', response=list[HospitalSchema])
+def search_hospital(request, query: str):
+    hospital = Hospital.objects.filter(
+        Q(hospital_name__icontains=query) | Q(city_town__icontains=query))
     return hospital
 
 
-
-#Busqueda con filter (Case sensitive)
+# Busqueda con filter (Case sensitive)
 @app.get('hospitals/find/', response=list[HospitalSchema], throttle=[AnonRateThrottle('1/s')])
 def list_hospitals(request, filters: HospitalFilterSchema = Query(...)):
-    hospital= Hospital.objects.all()
+    hospital = Hospital.objects.all()
     hospital = filters.filter(hospital)
     return hospital
 
-#Search by hospital name 
-@app.get('hospitals/',response=list[HospitalSchema], description='Endpoint to get all data of the hospital name')
+
+# Search by hospital name
+@app.get('hospitals/name/', response=list[HospitalSchema], description='Endpoint to get all data of the hospital name')
 def list_hospitals_by_name(request, filters: HospitalNameSchema = Query(...)):
-    hospital= Hospital.objects.all()
-    hospital = filters.filter(hospital) 
-    return hospital 
+    hospital = Hospital.objects.all()
+    hospital = filters.filter(hospital)
+    return hospital
 
 
-#search by district name 
-@app.get('hospitals/',response=list[HospitalSchema], description='Endpoint to get list of te hospitals by district name')
-def list_hospitals_by_disctrict(request, filters: HospitalDistrictSchema= Query(...)):
-    hopsital= Hospital.objects.all()
+# search by district name
+@app.get('hospitals/district/', response=list[HospitalSchema], description='Endpoint to get list of te hospitals by district name')
+def list_hospitals_by_disctrict(request, filters: HospitalDistrictSchema = Query(...)):
+    hopsital = Hospital.objects.all()
     hospital = filters.filter(hopsital)
     return hospital
 
 
-#endpoint para subir archivos
+# searc hospitals by website
+@app.get('hospitals/website/', response=list[HospitalSchema])
+def lists_hospitals_by_website(request, filters: HospiltaWebsiteSchema = Query(...)):
+    hospital = Hospital.objects.all()
+    hospital = filters.filter(hospital)
+    return hospital
+
+
+# endpoint para subir archivos
 @app.post('upload/')
 def upload(request, file: UploadedFile = File(...)):
     data = file.read()
