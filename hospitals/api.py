@@ -76,7 +76,7 @@ def search_hospital(request, query: str ):
 
 
 #Busqueda con filter (Case sensitive)
-@app.get('hospitals/find/', response=list[HospitalSchema])
+@app.get('hospitals/find/', response=list[HospitalSchema], throttle=[AnonRateThrottle])
 def list_hospitals(request, filters: HospitalFilterSchema = Query(...)):
     hospital= Hospital.objects.all()
     hospital = filters.filter(hospital)
